@@ -31,7 +31,7 @@ headless服务是指不需要ClusterIP的服务，在创建服务时指定```spe
   * kubelet 会为每个活跃的 Service 添加一组环境变量，要求 Pod 想要访问的任何 Service 必须在 Pod 自己之前被创建
 * DNS
   * DNS 服务器监视着创建新 Service 的 Kubernetes API，从而为每一个 Service 创建一组 DNS 记录, k8s体系中，DNS服务发现的结构如下图：
-    ![](Service-And-Kube-proxy/Service-And-Kube-proxy-9a3a490b.png)
+    ![](Service-And-Kube-proxy-9a3a490b.png)
 
   如上图所示，kube-dns 或 coredns会watch api-server上Service的变化，并根据规则自动生成DNS A记录。
 
