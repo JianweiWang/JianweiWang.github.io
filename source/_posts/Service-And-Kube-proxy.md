@@ -55,23 +55,18 @@ kube-proxy内部实现原理主要是使用iptables规则，更改filter和nat�
 
   ![](Service-And-Kube-proxy-74a4dc02.png)
   <center>图1</center>
-  </br>
-  </br>
 
   ![](Service-And-Kube-proxy-90b65a4a.png)
   <center>图2</center>
-  </br>
-  </br>
 
   ![](Service-And-Kube-proxy-9bf039d8.png)
   <center>图3</center>
-  </br>
-  </br>
 
 综上，数据包发到Node的处理过程：
 
 ![](Service-And-Kube-proxy-6cc5b0ce.png)
 <center>图片来自http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</center>
+
 
 Node发出的包的处理过程：
 ![](Service-And-Kube-proxy-d314f07b.png)
