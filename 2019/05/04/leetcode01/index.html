@@ -79,14 +79,17 @@
 
 
 
+<meta name="description" content="Add two numbers问题描述You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two n">
 <meta property="og:type" content="article">
 <meta property="og:title" content="leetcode01">
 <meta property="og:url" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2019/05/04/leetcode01/index.html">
 <meta property="og:site_name" content="Terminus">
+<meta property="og:description" content="Add two numbers问题描述You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two n">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-05-04T14:09:11.258Z">
+<meta property="og:updated_time" content="2019-05-04T14:20:42.456Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="leetcode01">
+<meta name="twitter:description" content="Add two numbers问题描述You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two n">
 
 
 
@@ -346,7 +349,18 @@
       
 
       
-        
+        <h2 id="Add-two-numbers"><a href="#Add-two-numbers" class="headerlink" title="Add two numbers"></a>Add two numbers</h2><h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.</p>
+<p>You may assume the two numbers do not contain any leading zero, except the number 0 itself.</p>
+<p>Example:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Input: (2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)</span><br><span class="line">Output: 7 -&gt; 0 -&gt; 8</span><br><span class="line">Explanation: 342 + 465 = 807.</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h3 id="解答"><a href="#解答" class="headerlink" title="解答"></a>解答</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Definition for singly-linked list.</span><br><span class="line"> * type ListNode struct &#123;</span><br><span class="line"> *     Val int</span><br><span class="line"> *     Next *ListNode</span><br><span class="line"> * &#125;</span><br><span class="line"> */</span><br><span class="line"></span><br><span class="line">func addTwoNumbers1(x, y, val int) (int, int) &#123;</span><br><span class="line">	v1 := x + y + val - 10</span><br><span class="line">	v2 := 0</span><br><span class="line">	if v1 &gt;= 0 &#123;</span><br><span class="line">		v2 = 1</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		v1 = x + y + val</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return v1, v2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode &#123;</span><br><span class="line">	node0 := ListNode&#123;0, nil&#125;</span><br><span class="line">	l4 := &amp;node0</span><br><span class="line">	head := &amp;node0</span><br><span class="line">	v3 := 0</span><br><span class="line">	for ; l1 != nil || l2 != nil; &#123;</span><br><span class="line">		v1, v2 := 0, 0</span><br><span class="line">		if l1 != nil &amp;&amp; l2 != nil &#123;</span><br><span class="line">			v1, v2 = addTwoNumbers1(l1.Val, l2.Val, v3)</span><br><span class="line">			v3 = v2</span><br><span class="line">			l4.Val = v1</span><br><span class="line"></span><br><span class="line">			l1 = l1.Next</span><br><span class="line">			l2 = l2.Next</span><br><span class="line">			if l1 != nil || l2 != nil &#123;</span><br><span class="line">				l4.Next = &amp;ListNode&#123;0, nil&#125;</span><br><span class="line">				l4 = l4.Next</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; else if l2 == nil &#123;</span><br><span class="line">			v1, v2 = addTwoNumbers1(l1.Val, 0, v3)</span><br><span class="line">			v3 = v2</span><br><span class="line">			l4.Val = v1</span><br><span class="line">			l1 = l1.Next</span><br><span class="line">			if l1 != nil &#123;</span><br><span class="line">				l4.Next = &amp;ListNode&#123;0, nil&#125;</span><br><span class="line">				l4 = l4.Next</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; else if l1 == nil &#123;</span><br><span class="line">			v1, v2 = addTwoNumbers1(0, l2.Val, v3)</span><br><span class="line">			v3 = v2</span><br><span class="line">			l4.Val = v1</span><br><span class="line">			l2 = l2.Next</span><br><span class="line">			if l2 != nil &#123;</span><br><span class="line">				l4.Next = &amp;ListNode&#123;0, nil&#125;</span><br><span class="line">				l4 = l4.Next</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	if v3 &gt; 0 &#123;</span><br><span class="line">		l4.Next = &amp;ListNode&#123;v3, nil&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return head</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Reverse-Integer"><a href="#Reverse-Integer" class="headerlink" title="Reverse Integer"></a>Reverse Integer</h2><h3 id="问题描述-1"><a href="#问题描述-1" class="headerlink" title="问题描述"></a>问题描述</h3><p>Given a 32-bit signed integer, reverse digits of an integer.</p>
+<h4 id="Example-1"><a href="#Example-1" class="headerlink" title="Example 1:"></a>Example 1:</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Input: 123</span><br><span class="line">Output: 321</span><br></pre></td></tr></table></figure>
+<h4 id="Example-2"><a href="#Example-2" class="headerlink" title="Example 2:"></a>Example 2:</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Input: -123</span><br><span class="line">Output: -321</span><br></pre></td></tr></table></figure>
+<h4 id="Example-3"><a href="#Example-3" class="headerlink" title="Example 3:"></a>Example 3:</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Input: 120</span><br><span class="line">Output: 21</span><br></pre></td></tr></table></figure>
+<p><strong>Note:</strong><br>Assume we are dealing with an environment which could only store integers within the 32-bit signed integer range: [−231,  231 − 1]. For the purpose of this problem, assume that your function returns 0 when the reversed integer overflows.</p>
+<h3 id="解答-1"><a href="#解答-1" class="headerlink" title="解答"></a>解答</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">class Solution &#123;</span><br><span class="line">    public int reverse(int x) &#123;</span><br><span class="line">        if (x == Integer.MIN_VALUE) &#123;</span><br><span class="line">            return 0;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        List&lt;Integer&gt; digitals = getNumbers(x);</span><br><span class="line"></span><br><span class="line">        long value = 0;</span><br><span class="line"></span><br><span class="line">        for (int i = digitals.size() - 1; i &gt;= 0; i--) &#123;</span><br><span class="line">            int a = digitals.get(i);</span><br><span class="line">            value += (a * Math.pow(10, digitals.size() - i - 1));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (x &lt; 0) &#123;</span><br><span class="line">            value = value * (-1);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (value &gt; Integer.MAX_VALUE || value &lt; Integer.MIN_VALUE) &#123;</span><br><span class="line">            return 0;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return (int) value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private List&lt;Integer&gt; getNumbers(int x) &#123;</span><br><span class="line">        List&lt;Integer&gt; digitals = new ArrayList&lt;Integer&gt;();</span><br><span class="line">        long y = (long)x;</span><br><span class="line">        if (x &lt; 0) &#123;</span><br><span class="line">            y = (long)x * (-1);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (;y &gt; 0;) &#123;</span><br><span class="line">            int z = (int) (y % 10);</span><br><span class="line">            digitals.add(z);</span><br><span class="line">            y = y / 10;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return digitals;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
       
     </div>
     
@@ -430,8 +444,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -498,6 +521,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Add-two-numbers"><span class="nav-number">1.</span> <span class="nav-text">Add two numbers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题描述"><span class="nav-number">1.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解答"><span class="nav-number">1.2.</span> <span class="nav-text">解答</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reverse-Integer"><span class="nav-number">2.</span> <span class="nav-text">Reverse Integer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题描述-1"><span class="nav-number">2.1.</span> <span class="nav-text">问题描述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-1"><span class="nav-number">2.1.1.</span> <span class="nav-text">Example 1:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-2"><span class="nav-number">2.1.2.</span> <span class="nav-text">Example 2:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-3"><span class="nav-number">2.1.3.</span> <span class="nav-text">Example 3:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解答-1"><span class="nav-number">2.2.</span> <span class="nav-text">解答</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
