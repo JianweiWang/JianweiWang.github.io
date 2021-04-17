@@ -5,7 +5,7 @@ tags: service
 ---
 ## Introduction
 本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。
-
+<!--more-->
 ## Service
 kubernetes架构中，Service是对一组提供相同功能pod的抽象。Service通过标签选取服务后端。Service有四种类型：
   * ClusterIP: 默认类型，为服务自动分配一个虚拟ip，该ip仅集群内部可见
