@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="something of everyday," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -79,18 +79,13 @@
 
 
 
-<meta name="description" content="每日一记（1）设计系统时，如何正确高效地运用并发是一个比较难的问题。以我个人的经验看，大概可以分为以下几个原则：  多读单写，单个线程修改，多条线程读取（一般采用队列方式），适用于读多写少的场景； 多读多写；多条线程同时读写。这种场景比较复杂，可以采用锁或者hash机制；">
-<meta name="keywords" content="something of everyday">
-<meta property="og:type" content="article">
-<meta property="og:title" content="20201104">
-<meta property="og:url" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2020/11/05/20201104/index.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Terminus">
+<meta property="og:url" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/categories/reading/index.html">
 <meta property="og:site_name" content="Terminus">
-<meta property="og:description" content="每日一记（1）设计系统时，如何正确高效地运用并发是一个比较难的问题。以我个人的经验看，大概可以分为以下几个原则：  多读单写，单个线程修改，多条线程读取（一般采用队列方式），适用于读多写少的场景； 多读多写；多条线程同时读写。这种场景比较复杂，可以采用锁或者hash机制；">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-11-08T13:54:41.242Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="20201104">
-<meta name="twitter:description" content="每日一记（1）设计系统时，如何正确高效地运用并发是一个比较难的问题。以我个人的经验看，大概可以分为以下几个原则：  多读单写，单个线程修改，多条线程读取（一般采用队列方式），适用于读多写少的场景； 多读多写；多条线程同时读写。这种场景比较复杂，可以采用锁或者hash机制；">
+<meta name="twitter:title" content="Terminus">
 
 
 
@@ -120,13 +115,13 @@
 
 
 
-  <link rel="canonical" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2020/11/05/20201104/"/>
+  <link rel="canonical" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/categories/reading/"/>
 
 
 
 
 
-  <title>20201104 | Terminus</title>
+  <title>Category: reading | Terminus</title>
   
 
 
@@ -145,7 +140,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -269,155 +264,111 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  
+  
+  
+  <div class="post-block category">
 
-  
+    <div id="posts" class="posts-collapse">
+      <div class="collection-title">
+        <h1>reading<small>Category</small>
+        </h1>
+      </div>
 
-  
-  
-  
+      
+        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2020/11/05/20201104/">
+    <header class="post-header">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="正己">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Terminus">
-    </span>
-
-    
-      <header class="post-header">
-
+      <h2 class="post-title">
         
-        
-          <h1 class="post-title" itemprop="name headline">20201104</h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
+            <a class="post-title-link" href="/2019/03/13/薛兆丰经济学讲义读书笔记3/" itemprop="url">
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span itemprop="name">薛兆丰经济学讲义读书笔记3</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-11-05T00:15:17+08:00">
-                2020-11-05
-              </time>
-            
+            </a>
+        
+      </h2>
 
-            
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2019-03-13T00:07:17+08:00"
+              content="2019-03-13" >
+          03-13
+        </time>
+      </div>
 
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <h2 id="每日一记（1）"><a href="#每日一记（1）" class="headerlink" title="每日一记（1）"></a>每日一记（1）</h2><p>设计系统时，如何正确高效地运用并发是一个比较难的问题。以我个人的经验看，大概可以分为以下几个原则：</p>
-<ul>
-<li>多读单写，单个线程修改，多条线程读取（一般采用队列方式），适用于读多写少的场景；</li>
-<li>多读多写；多条线程同时读写。这种场景比较复杂，可以采用锁或者hash机制；</li>
-</ul>
-
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/something-of-everyday/" rel="tag"># something of everyday</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2019/05/27/linux-strace-command-introduction/" rel="next" title="linux strace command introduction">
-                <i class="fa fa-chevron-left"></i> linux strace command introduction
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/11/08/20201108/" rel="prev" title="20201108">
-                20201108 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
+    </header>
   </article>
 
 
+      
+        
 
-    <div class="post-spread">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+            <a class="post-title-link" href="/2019/03/10/薛兆丰经济学讲义读书笔记2/" itemprop="url">
+              
+                <span itemprop="name">薛兆丰经济学讲义读书笔记2</span>
+              
+            </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2019-03-10T21:51:12+08:00"
+              content="2019-03-10" >
+          03-10
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+      
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+            <a class="post-title-link" href="/2019/03/06/薛兆丰经济学讲义读书笔记1/" itemprop="url">
+              
+                <span itemprop="name">薛兆丰经济学讲义读书笔记1</span>
+              
+            </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2019-03-06T23:24:27+08:00"
+              content="2019-03-06" >
+          03-06
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
       
     </div>
+
   </div>
+  
+  
+  
+
+  
+
 
 
           </div>
@@ -425,10 +376,6 @@
 
 
           
-
-  
-
-
 
         </div>
         
@@ -449,17 +396,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -535,22 +473,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#每日一记（1）"><span class="nav-number">1.</span> <span class="nav-text">每日一记（1）</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -685,10 +607,6 @@
 
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
 
   
 
