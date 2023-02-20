@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Introduction本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Service And Kube-proxy">
+<meta property="og:url" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/index.html">
+<meta property="og:site_name" content="Terminus">
+<meta property="og:description" content="Introduction本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-9a3a490b.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-02d62faa.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-74a4dc02.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-90b65a4a.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-9bf039d8.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-6cc5b0ce.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-d314f07b.png">
+<meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-323364fe.png">
+<meta property="article:published_time" content="2018-05-27T15:07:15.000Z">
+<meta property="article:modified_time" content="2023-02-20T13:52:10.006Z">
+<meta property="article:author" content="正己">
+<meta property="article:tag" content="service">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-9a3a490b.png">
+
+<link rel="canonical" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Service And Kube-proxy | Terminus</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Terminus</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Give time to civilization, not to civilization</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="正己">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Terminus">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Service And Kube-proxy
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-27 23:07:15" itemprop="dateCreated datePublished" datetime="2018-05-27T23:07:15+08:00">2018-05-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-20 21:52:10" itemprop="dateModified" datetime="2023-02-20T21:52:10+08:00">2023-02-20</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。<br><span id="more"></span></p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>kubernetes架构中，Service是对一组提供相同功能pod的抽象。Service通过标签选取服务后端。Service有四种类型：</p>
+<ul>
+<li>ClusterIP: 默认类型，为服务自动分配一个虚拟ip，该ip仅集群内部可见</li>
+<li>NodePort: 在ClusterIP的基础上，为Service在每台机器上绑定一个端口，外部请求可以通过NodeIP:NodePort访问服务</li>
+<li>LoadBalancer: 在NodePort的基础上，通过云服务厂商创建一个外部的负载均衡器</li>
+<li>ExternalName: 把服务通过CNAME的方式转发到制定的域名。<br><br/></li>
+</ul>
+<h3 id="创建Service"><a href="#创建Service" class="headerlink" title="创建Service"></a>创建Service</h3><ul>
+<li>一般，在创建服务时，需要指定selector，该selector会和特定label关联，通过和pod的label对比，选择相应的pod作为该服务的endpoints；</li>
+<li>如果不指定selector，可以自己定义endpoint，需要创建一个和Service同名的Endpoints资源，在endpoint中配置指定的ip和端口；</li>
+<li>还有一种情况不需要指定selectors，就是通过DNS CNAME方式把服务转发到指定的域名；<br><br/></li>
+</ul>
+<h3 id="headless-服务"><a href="#headless-服务" class="headerlink" title="headless 服务"></a>headless 服务</h3><p>headless服务是指不需要ClusterIP的服务，在创建服务时指定<code>spec.clusterIP=None</code>, 包括两类：</p>
+<ul>
+<li>不指定selectors，但设置externalName；</li>
+<li>不指定selectors，通过A记录设置后段endpoint列表；</li>
+</ul>
+<h2 id="Service-Discovery"><a href="#Service-Discovery" class="headerlink" title="Service Discovery"></a>Service Discovery</h2><p>服务发现分两种类型：</p>
+<ul>
+<li>环境变量<ul>
+<li>kubelet 会为每个活跃的 Service 添加一组环境变量，要求 Pod 想要访问的任何 Service 必须在 Pod 自己之前被创建</li>
+</ul>
+</li>
+<li><p>DNS</p>
+<ul>
+<li>DNS 服务器监视着创建新 Service 的 Kubernetes API，从而为每一个 Service 创建一组 DNS 记录, k8s体系中，DNS服务发现的结构如下图：<br><img src="Service-And-Kube-proxy-9a3a490b.png" alt=""></li>
+</ul>
+<p>如上图所示，kube-dns 或 coredns会watch api-server上Service的变化，并根据规则自动生成DNS A记录。</p>
+</li>
+</ul>
+<h2 id="Kube-proxy"><a href="#Kube-proxy" class="headerlink" title="Kube-proxy"></a>Kube-proxy</h2><p>用户创建service后，k8s会为这个LB提供一个IP，一般称为cluster IP。 kube-proxy的作用主要是负责service的实现，具体来说，就是实现了内部从pod到service和外部的从node port向service的访问。</p>
+<p>kube-proxy内部实现原理主要是使用iptables规则，更改filter和nat表。filter表中增加KUBE-FIREWALL和KUBE-SERVICES两个规则链。所有出的报文都经过KUBE-SERVICES，如果没有找到endpoint，则丢弃报文。nat表则设置的规则比较多，主要是各种跳转，下图1中给出了部分。nat表的处理主要步骤为：</p>
+<ul>
+<li>inbound：在PREROUTING阶段，将所有报文转发到KUBE-SERVICES</li>
+<li>outbound：在OUTPUT阶段，将所有报文转发到KUBE-SERVICES</li>
+<li>outbound：在POSTROUTING阶段，将所有报文转发到KUBE-POSTROUTING</li>
+</ul>
+<p>以my-nginx服务为例，该服务clusterIP为10.254.82.158，有两个pod，ip分贝为172.30.39.3和172.30.23.8，如下图：</p>
+<p>  <img src="Service-And-Kube-proxy-02d62faa.png" alt=""></p>
+<p>使用sudo iptables -t nat -L命令查看nat转发表，只截出了相关的部分，如下图1。</p>
+<ul>
+<li>首先pod通过dns查询到clusterIP 10.254.82.158，然后发起调用；</li>
+<li>请求进入KUBE-SVC-BEPXDJBUHFCSYIC3</li>
+<li>KUBE-SVC-BEPXDJBUHFCSYIC3配置了两个pod的概率，0.5</li>
+<li><p>然后请求按照一定概率被转发到另个目的pod，如图2和图3</p>
+<p><img src="Service-And-Kube-proxy-74a4dc02.png" alt=""></p>
+<center>图1</center>
+
+<p><img src="Service-And-Kube-proxy-90b65a4a.png" alt=""></p>
+<center>图2</center>
+
+<p><img src="Service-And-Kube-proxy-9bf039d8.png" alt=""></p>
+<center>图3</center>
+
+</li>
+</ul>
+<p>综上，数据包发到Node的处理过程：</p>
+<p><img src="Service-And-Kube-proxy-6cc5b0ce.png" alt=""></p>
+<center>图片来自<a target="_blank" rel="noopener" href="http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html">http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</a></center>
+
+
+<p>Node发出的包的处理过程：<br><img src="Service-And-Kube-proxy-d314f07b.png" alt=""></p>
+<center>图片来自<a target="_blank" rel="noopener" href="http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html">http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</a></center>
+
+<h2 id="CoreDNS"><a href="#CoreDNS" class="headerlink" title="CoreDNS"></a>CoreDNS</h2><p>CoreDNS在k8s中主要负责把Service转换成DNS域名并添加相应的A记录。CoreDNS支持标准的dns协议，插件化，支持多种数据源。</p>
+<p><img src="Service-And-Kube-proxy-323364fe.png" alt=""></p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>综上，本文简单介绍了kubernetes体系中，服务发现相关的概念及原理，包括服务类型、服务定义、服务发现方式及kube-proxy的工作原理。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/service/" rel="tag"># service</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/27/Network-Model-in-Kubernetes/" rel="prev" title="Network Model in Kubernetes">
+      <i class="fa fa-chevron-left"></i> Network Model in Kubernetes
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/28/DNS-Cache-In-Linux/" rel="next" title="DNS Cache In Linux">
+      DNS Cache In Linux <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">2.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAService"><span class="nav-number">2.1.</span> <span class="nav-text">创建Service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#headless-%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">headless 服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Discovery"><span class="nav-number">3.</span> <span class="nav-text">Service Discovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kube-proxy"><span class="nav-number">4.</span> <span class="nav-text">Kube-proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CoreDNS"><span class="nav-number">5.</span> <span class="nav-text">CoreDNS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">正己</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">正己</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
