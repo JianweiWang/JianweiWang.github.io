@@ -81,4 +81,4 @@ deploy:
   type: git
   #repository: https://github.com/JianweiWang/JianweiWang.github.io.git
   repository: git@github.com:JianweiWang/JianweiWang.github.io.git
-  branch: master
+  branch: blog
