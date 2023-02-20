@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 3.7.1">
+<meta name="generator" content="Hexo 6.3.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
@@ -21,13 +21,12 @@
   </script>
 
   <meta name="description" content="Introduction本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。">
-<meta name="keywords" content="service">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Service And Kube-proxy">
 <meta property="og:url" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/index.html">
 <meta property="og:site_name" content="Terminus">
 <meta property="og:description" content="Introduction本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。">
-<meta property="og:locale" content="zh-CN">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-9a3a490b.png">
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-02d62faa.png">
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-74a4dc02.png">
@@ -36,10 +35,11 @@
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-6cc5b0ce.png">
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-d314f07b.png">
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-323364fe.png">
-<meta property="og:updated_time" content="2021-11-07T07:27:29.660Z">
+<meta property="article:published_time" content="2018-05-27T15:07:15.000Z">
+<meta property="article:modified_time" content="2023-02-20T13:52:10.006Z">
+<meta property="article:author" content="正己">
+<meta property="article:tag" content="service">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Service And Kube-proxy">
-<meta name="twitter:description" content="Introduction本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。">
 <meta name="twitter:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/Service-And-Kube-proxy-9a3a490b.png">
 
 <link rel="canonical" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Service-And-Kube-proxy/">
@@ -206,7 +206,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-11-07 15:27:29" itemprop="dateModified" datetime="2021-11-07T15:27:29+08:00">2021-11-07</time>
+                <time title="修改时间：2023-02-20 21:52:10" itemprop="dateModified" datetime="2023-02-20T21:52:10+08:00">2023-02-20</time>
               </span>
 
           
@@ -220,18 +220,18 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。<br><a id="more"></a></p>
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>本文探究kubernetes架构中，服务发现的具体工作原理，涉及到service定义、服务发现与coredns，kube-proxy工作原理等。<br><span id="more"></span></p>
 <h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>kubernetes架构中，Service是对一组提供相同功能pod的抽象。Service通过标签选取服务后端。Service有四种类型：</p>
 <ul>
 <li>ClusterIP: 默认类型，为服务自动分配一个虚拟ip，该ip仅集群内部可见</li>
 <li>NodePort: 在ClusterIP的基础上，为Service在每台机器上绑定一个端口，外部请求可以通过NodeIP:NodePort访问服务</li>
 <li>LoadBalancer: 在NodePort的基础上，通过云服务厂商创建一个外部的负载均衡器</li>
-<li>ExternalName: 把服务通过CNAME的方式转发到制定的域名。<br><br></li>
+<li>ExternalName: 把服务通过CNAME的方式转发到制定的域名。<br><br/></li>
 </ul>
 <h3 id="创建Service"><a href="#创建Service" class="headerlink" title="创建Service"></a>创建Service</h3><ul>
 <li>一般，在创建服务时，需要指定selector，该selector会和特定label关联，通过和pod的label对比，选择相应的pod作为该服务的endpoints；</li>
 <li>如果不指定selector，可以自己定义endpoint，需要创建一个和Service同名的Endpoints资源，在endpoint中配置指定的ip和端口；</li>
-<li>还有一种情况不需要指定selectors，就是通过DNS CNAME方式把服务转发到指定的域名；<br><br></li>
+<li>还有一种情况不需要指定selectors，就是通过DNS CNAME方式把服务转发到指定的域名；<br><br/></li>
 </ul>
 <h3 id="headless-服务"><a href="#headless-服务" class="headerlink" title="headless 服务"></a>headless 服务</h3><p>headless服务是指不需要ClusterIP的服务，在创建服务时指定<code>spec.clusterIP=None</code>, 包括两类：</p>
 <ul>
@@ -279,11 +279,11 @@
 </ul>
 <p>综上，数据包发到Node的处理过程：</p>
 <p><img src="Service-And-Kube-proxy-6cc5b0ce.png" alt=""></p>
-<center>图片来自<a href="http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html" target="_blank" rel="noopener">http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</a></center>
+<center>图片来自<a target="_blank" rel="noopener" href="http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html">http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</a></center>
 
 
 <p>Node发出的包的处理过程：<br><img src="Service-And-Kube-proxy-d314f07b.png" alt=""></p>
-<center>图片来自<a href="http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html" target="_blank" rel="noopener">http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</a></center>
+<center>图片来自<a target="_blank" rel="noopener" href="http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html">http://www.lijiaocn.com/%E9%A1%B9%E7%9B%AE/2017/03/27/Kubernetes-kube-proxy.html</a></center>
 
 <h2 id="CoreDNS"><a href="#CoreDNS" class="headerlink" title="CoreDNS"></a>CoreDNS</h2><p>CoreDNS在k8s中主要负责把Service转换成DNS域名并添加相应的A记录。CoreDNS支持标准的dns协议，插件化，支持多种数据源。</p>
 <p><img src="Service-And-Kube-proxy-323364fe.png" alt=""></p>
@@ -371,7 +371,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">2.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建Service"><span class="nav-number">2.1.</span> <span class="nav-text">创建Service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#headless-服务"><span class="nav-number">2.2.</span> <span class="nav-text">headless 服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Discovery"><span class="nav-number">3.</span> <span class="nav-text">Service Discovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kube-proxy"><span class="nav-number">4.</span> <span class="nav-text">Kube-proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CoreDNS"><span class="nav-number">5.</span> <span class="nav-text">CoreDNS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">2.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAService"><span class="nav-number">2.1.</span> <span class="nav-text">创建Service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#headless-%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">headless 服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Discovery"><span class="nav-number">3.</span> <span class="nav-text">Service Discovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kube-proxy"><span class="nav-number">4.</span> <span class="nav-text">Kube-proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CoreDNS"><span class="nav-number">5.</span> <span class="nav-text">CoreDNS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -425,7 +425,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -451,9 +451,17 @@
   <script src="/lib/anime.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
 <script src="/js/schemes/pisces.js"></script>
+
+
 <script src="/js/next-boot.js"></script>
+
 
 
 

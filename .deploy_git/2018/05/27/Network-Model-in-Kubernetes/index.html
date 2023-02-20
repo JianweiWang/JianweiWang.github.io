@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 3.7.1">
+<meta name="generator" content="Hexo 6.3.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
@@ -21,18 +21,18 @@
   </script>
 
   <meta name="description" content="本文主要剖析kubernetes中网络模型，详细介绍pod之间的通信流程。 网络模型概况kubernetes对网络的要求 所有的容器都可以在不用NAT的方式下同别的容器通信 所有容器节点都可以在不用NAT的方式下同所有容器通信 容器的地址和别人看到的地址是同一个地址">
-<meta name="keywords" content="kubernetes Network">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Network Model in Kubernetes">
 <meta property="og:url" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Network-Model-in-Kubernetes/index.html">
 <meta property="og:site_name" content="Terminus">
 <meta property="og:description" content="本文主要剖析kubernetes中网络模型，详细介绍pod之间的通信流程。 网络模型概况kubernetes对网络的要求 所有的容器都可以在不用NAT的方式下同别的容器通信 所有容器节点都可以在不用NAT的方式下同所有容器通信 容器的地址和别人看到的地址是同一个地址">
-<meta property="og:locale" content="zh-CN">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Network-Model-in-Kubernetes/Network-Model-in-Kubernetes-6c165903.png">
-<meta property="og:updated_time" content="2021-11-07T07:27:29.659Z">
+<meta property="article:published_time" content="2018-05-27T11:00:45.000Z">
+<meta property="article:modified_time" content="2023-02-20T13:52:10.006Z">
+<meta property="article:author" content="正己">
+<meta property="article:tag" content="kubernetes Network">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Network Model in Kubernetes">
-<meta name="twitter:description" content="本文主要剖析kubernetes中网络模型，详细介绍pod之间的通信流程。 网络模型概况kubernetes对网络的要求 所有的容器都可以在不用NAT的方式下同别的容器通信 所有容器节点都可以在不用NAT的方式下同所有容器通信 容器的地址和别人看到的地址是同一个地址">
 <meta name="twitter:image" content="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Network-Model-in-Kubernetes/Network-Model-in-Kubernetes-6c165903.png">
 
 <link rel="canonical" href="https://github.com/JianweiWang/JianweiWang.github.io/blob/master/2018/05/27/Network-Model-in-Kubernetes/">
@@ -199,7 +199,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-11-07 15:27:29" itemprop="dateModified" datetime="2021-11-07T15:27:29+08:00">2021-11-07</time>
+                <time title="修改时间：2023-02-20 21:52:10" itemprop="dateModified" datetime="2023-02-20T21:52:10+08:00">2023-02-20</time>
               </span>
 
           
@@ -217,7 +217,7 @@
 <h2 id="网络模型概况"><a href="#网络模型概况" class="headerlink" title="网络模型概况"></a>网络模型概况</h2><h3 id="kubernetes对网络的要求"><a href="#kubernetes对网络的要求" class="headerlink" title="kubernetes对网络的要求"></a>kubernetes对网络的要求</h3><ul>
 <li>所有的容器都可以在不用NAT的方式下同别的容器通信</li>
 <li>所有容器节点都可以在不用NAT的方式下同所有容器通信</li>
-<li>容器的地址和别人看到的地址是同一个地址<a id="more"></a>
+<li>容器的地址和别人看到的地址是同一个地址<span id="more"></span>
 <h3 id="kubernetes的网络场景"><a href="#kubernetes的网络场景" class="headerlink" title="kubernetes的网络场景"></a>kubernetes的网络场景</h3></li>
 <li><p>容器间直接通信</p>
 <p>同一个pod中，不通容器共享一个网络命名空间，共享同一个Linux协议栈，可以直接通过localhost通信。</p>
@@ -248,7 +248,7 @@
 </ul>
 <p>三层网络的结构下图：</p>
 <p><img src="Network-Model-in-Kubernetes-6c165903.png" alt=""></p>
-<p><center>kubernetes网络结构</center><br><br><br><br></p>
+<p><center>kubernetes网络结构</center><br><br/><br><br/></p>
 <p>其中，docker0是Node内部不通pod间的默认路由，pod的IP地址从docker0动态分配；flannel负责overylay网络维护，把docker0内的私网和Node节点的网络打通；GateWay则是Node网络中的默认路由，负责物理网络数据包转发。</p>
 <h3 id="开源网络组件Flannel"><a href="#开源网络组件Flannel" class="headerlink" title="开源网络组件Flannel"></a>开源网络组件Flannel</h3><p>在kubernetes中，flannel的左右有以下两点：</p>
 <ul>
@@ -256,7 +256,7 @@
 <li>在这些IP之间建立一个覆盖网络(Overlay Network),通过这个覆盖网络，将数据包原封不动的传递到目标容器内</li>
 </ul>
 <p>首先，flannel创建一个flannel0网桥，一端连接docker0网桥，另一端连接flanneld的服务进程。flanneld进程跟kubernetes集群中的etcd通信，管理网段资源，同时监控每个pod的实际地址，并在内存中建立一个pod节点的路由表。flanneld进程一端连接flannel0网桥，另一端连接物理网络。</p>
-<p><br></p>
+<p><br/></p>
 <p>综上，以pod0和pod2的通信为例，数据的流转是这样的：</p>
 <p>pod0 –&gt; docker0 –&gt; flannel0 –&gt; flanneld –&gt; Node0物理网卡 –&gt; Node1物理网卡 –&gt; flanneld –&gt; flannel0 –&gt; docker0 –&gt; pod2</p>
 
@@ -339,7 +339,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络模型概况"><span class="nav-number">1.</span> <span class="nav-text">网络模型概况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes对网络的要求"><span class="nav-number">1.1.</span> <span class="nav-text">kubernetes对网络的要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes的网络场景"><span class="nav-number">1.2.</span> <span class="nav-text">kubernetes的网络场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes网络结构"><span class="nav-number">1.3.</span> <span class="nav-text">kubernetes网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开源网络组件Flannel"><span class="nav-number">1.4.</span> <span class="nav-text">开源网络组件Flannel</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E6%A6%82%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">网络模型概况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes%E5%AF%B9%E7%BD%91%E7%BB%9C%E7%9A%84%E8%A6%81%E6%B1%82"><span class="nav-number">1.1.</span> <span class="nav-text">kubernetes对网络的要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes%E7%9A%84%E7%BD%91%E7%BB%9C%E5%9C%BA%E6%99%AF"><span class="nav-number">1.2.</span> <span class="nav-text">kubernetes的网络场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">kubernetes网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%BA%90%E7%BD%91%E7%BB%9C%E7%BB%84%E4%BB%B6Flannel"><span class="nav-number">1.4.</span> <span class="nav-text">开源网络组件Flannel</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -393,7 +393,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -419,9 +419,17 @@
   <script src="/lib/anime.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
 <script src="/js/schemes/pisces.js"></script>
+
+
 <script src="/js/next-boot.js"></script>
+
 
 
 
